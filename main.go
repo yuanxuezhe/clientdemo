@@ -2,11 +2,14 @@ package main
 
 import (
 	"clientdemo/msg"
+	"clientdemo/util/pool"
 	"encoding/json"
 	"fmt"
 	network "gitee.com/yuanxuezhe/ynet/tcp"
 	"net"
-	//"time"
+	"strconv"
+	"sync"
+	"time"
 )
 
 type Login struct {
@@ -18,19 +21,31 @@ type Login struct {
 	Passwd  string `json:"passwd"`  // 密码
 }
 
+var wg *sync.WaitGroup
+
 func main() {
-	conn, err := net.Dial("tcp", "127.0.0.1:9001")
+	wg = &sync.WaitGroup{}
+	//for i := 0; i < 10; i ++ {
+	wg.Add(1)
+	go Handler(1, wg)
+	time.Sleep(10 * time.Millisecond)
+	//}
+
+	wg.Wait()
+}
+
+func Handler(i int, wg *sync.WaitGroup) {
+	conn, err := pool.Connpool.Get()
 	if err != nil {
 		panic(err)
 	}
 
 	logon := Login{
-		Type: 0, // 登录类型 0、注册 1、登录 2、登出
-		//Account:		// 账号 userid/phone num/email
-		Userid: "yuan379152355",
-		Phone:  18664324256,        // 手机号码
-		Email:  "446968454@qq.com", // 邮箱
-		Passwd: "ys6303618",        // 密码
+		Type:    0,                  // 登录类型 0、注册 1、登录 2、登出
+		Account: "",                 // 账号 userid/phone num/email
+		Phone:   18664324257,        // 手机号码
+		Email:   "446968454@qq.com", // 邮箱
+		Passwd:  "ys6303618",        // 密码
 	}
 
 	jsons, errs := json.Marshal(logon) //转换成JSON返回的是byte[]
@@ -41,8 +56,11 @@ func main() {
 	jsons = msg.PackageMsg("Login", string(jsons))
 
 	// 发送消息
-	network.SendMsg(conn, jsons)
+	network.SendMsg(conn.(net.Conn), jsons)
 
-	buff, _ := network.ReadMsg(conn)
-	fmt.Println(string(buff))
+	buff, _ := network.ReadMsg(conn.(net.Conn))
+	fmt.Println(strconv.Itoa(i) + "  " + string(buff))
+
+	pool.Connpool.Put(conn)
+	wg.Done()
 }
