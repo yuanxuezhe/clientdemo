@@ -25,11 +25,11 @@ var wg *sync.WaitGroup
 
 func main() {
 	wg = &sync.WaitGroup{}
-	//for i := 0; i < 10; i ++ {
-	wg.Add(1)
-	go Handler(1, wg)
-	time.Sleep(10 * time.Millisecond)
-	//}
+	for i := 0; i < 10; i++ {
+		wg.Add(1)
+		go Handler(1, wg)
+		time.Sleep(10 * time.Millisecond)
+	}
 
 	wg.Wait()
 }
@@ -41,11 +41,11 @@ func Handler(i int, wg *sync.WaitGroup) {
 	}
 
 	logon := Login{
-		Type:    0,                  // 登录类型 0、注册 1、登录 2、登出
-		Account: "",                 // 账号 userid/phone num/email
-		Phone:   18664324257,        // 手机号码
-		Email:   "446968454@qq.com", // 邮箱
-		Passwd:  "ys6303618",        // 密码
+		Type:    1,                   // 登录类型 0、注册 1、登录 2、登出
+		Account: "",                  // 账号 userid/phone num/email
+		Phone:   186643242567,        // 手机号码
+		Email:   "4469684514@qq.com", // 邮箱
+		Passwd:  "ys6303618",         // 密码
 	}
 
 	jsons, errs := json.Marshal(logon) //转换成JSON返回的是byte[]
