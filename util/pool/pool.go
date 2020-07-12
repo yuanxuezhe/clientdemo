@@ -1,8 +1,8 @@
 package pool
 
 import (
+	"gitee.com/yuanxuezhe/ynet"
 	"gitee.com/yuanxuezhe/ynet/yconnpool"
-	"net"
 	"time"
 )
 
@@ -15,6 +15,6 @@ func init() {
 	//}, 100, time.Second*100)
 	//conn, err := net.Dial("tcp", "127.0.0.1:9001")
 	Connpool, _ = yconnpool.NewConnPool(func() (yconnpool.ConnRes, error) {
-		return net.Dial("tcp", "127.0.0.1:9001")
-	}, 50, time.Second*100)
+		return ynet.NewTcpclient("192.168.0.3:9001"), nil
+	}, 2, time.Second*100)
 }
