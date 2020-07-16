@@ -15,6 +15,6 @@ func init() {
 	//}, 100, time.Second*100)
 	//conn, err := net.Dial("tcp", "127.0.0.1:9001")
 	Connpool, _ = yconnpool.NewConnPool(func() (yconnpool.ConnRes, error) {
-		return ynet.NewTcpclient("192.168.0.3:9001"), nil
+		return ynet.NewTcpclient("192.168.120.37:9001"), nil
 	}, 2, time.Second*100)
 }

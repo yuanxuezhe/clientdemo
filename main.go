@@ -2,10 +2,9 @@ package main
 
 import (
 	"clientdemo/msg"
-	"clientdemo/util/pool"
 	"encoding/json"
 	"fmt"
-	commconn "gitee.com/yuanxuezhe/ynet/Conn"
+	"gitee.com/yuanxuezhe/ynet"
 	"strconv"
 	"sync"
 	"time"
@@ -37,19 +36,18 @@ var wg *sync.WaitGroup
 
 func main() {
 	wg = &sync.WaitGroup{}
-	for i := 0; ; i++ {
-		wg.Add(1)
-		go Handler(1, wg)
-		time.Sleep(10 * time.Second)
-	}
+	//for i := 0; ; i++ {
+	wg.Add(1)
+	go Handler(1, wg)
+	time.Sleep(1 * time.Second)
+	//}
 
 	wg.Wait()
 }
 
 func Handler(i int, wg *sync.WaitGroup) {
-	conn, _ := pool.Connpool.Get()
 	//conn := ynet.NewWsclient("ws://0.0.0.0:19001")
-	//conn := ynet.NewTcpclient(":9001")
+	conn := ynet.NewTcpclient("192.168.2.3:9201")
 
 	//goods := Goods{
 	//	Status:    0,                   // 登录类型 0、注册 1、登录 2、登出
@@ -65,7 +63,7 @@ func Handler(i int, wg *sync.WaitGroup) {
 	logon := Login{
 		Type:    1,                   // 登录类型 0、注册 1、登录 2、登出
 		Account: "",                  // 账号 userid/phone num/email
-		Phone:   18664324256,         // 手机号码
+		Phone:   18664324257,         // 手机号码
 		Email:   "4469684514@qq.com", // 邮箱
 		Passwd:  "ys6303618",         // 密码
 	}
@@ -78,9 +76,9 @@ func Handler(i int, wg *sync.WaitGroup) {
 	jsons = msg.PackageMsg("Login", string(jsons))
 
 	// 发送消息
-	conn.(commconn.CommConn).WriteMsg(jsons)
+	conn.WriteMsg(jsons)
 
-	buff, _ := conn.(commconn.CommConn).ReadMsg()
+	buff, _ := conn.ReadMsg()
 	fmt.Println("TCP:" + strconv.Itoa(i) + "  " + string(buff))
 
 	// 发送消息
@@ -89,6 +87,5 @@ func Handler(i int, wg *sync.WaitGroup) {
 	//buff1, _ := conn.ReadMsg()
 	//fmt.Println("W S:" +strconv.Itoa(i) + "  " + string(buff1))
 
-	pool.Connpool.Put(conn)
 	wg.Done()
 }
