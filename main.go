@@ -37,9 +37,10 @@ var wg *sync.WaitGroup
 func main() {
 	wg = &sync.WaitGroup{}
 	//for i := 0; ; i++ {
+	//fmt.Println(i)
 	wg.Add(1)
 	go Handler(1, wg)
-	time.Sleep(1 * time.Second)
+	time.Sleep(1 * time.Millisecond)
 	//}
 
 	wg.Wait()
@@ -63,20 +64,23 @@ func Handler(i int, wg *sync.WaitGroup) {
 	logon := Login{
 		Type:    1,                   // 登录类型 0、注册 1、登录 2、登出
 		Account: "",                  // 账号 userid/phone num/email
-		Phone:   18664324257,         // 手机号码
+		Phone:   1,                   // 手机号码
 		Email:   "4469684514@qq.com", // 邮箱
 		Passwd:  "ys6303618",         // 密码
 	}
 
-	jsons, errs := json.Marshal(logon) //转换成JSON返回的是byte[]
-	if errs != nil {
-		fmt.Println(errs.Error())
+	for i := 0; i < 3; i++ {
+		logon.Phone = logon.Phone + 1
+		jsons, errs := json.Marshal(logon) //转换成JSON返回的是byte[]
+		if errs != nil {
+			fmt.Println(errs.Error())
+		}
+
+		jsons = msg.PackageMsg("Login", string(jsons))
+		// 发送消息
+		conn.WriteMsg(jsons)
+		time.Sleep(1 * time.Second)
 	}
-
-	jsons = msg.PackageMsg("Login", string(jsons))
-
-	// 发送消息
-	conn.WriteMsg(jsons)
 
 	buff, _ := conn.ReadMsg()
 	fmt.Println("TCP:" + strconv.Itoa(i) + "  " + string(buff))
