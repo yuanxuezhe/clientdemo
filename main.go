@@ -37,19 +37,19 @@ var wgg sync.WaitGroup
 
 func main() {
 	//wg = &sync.WaitGroup{}
-	for i := 0; i < 100; i++ {
+	for i := 0; i < 10; i++ {
 		wgg.Add(1)
 		//fmt.Println(i)
-		go Handler(i)
+		go Handler(i, &wg, &wgg)
 		time.Sleep(1 * time.Millisecond)
 	}
 	wgg.Wait()
 	wg.Wait()
 }
 
-func Handler(i int) {
+func Handler(i int, wg *sync.WaitGroup, wgg *sync.WaitGroup) {
 	//conn := ynet.NewWsclient("ws://0.0.0.0:19001")
-	conn := ynet.NewTcpclient("192.168.0.3:9001")
+	conn := ynet.NewTcpclient("192.168.2.3:9001")
 	fmt.Println(conn.LocalAddr(), "===>", conn.RemoteAddr())
 
 	//goods := Goods{
@@ -64,7 +64,7 @@ func Handler(i int) {
 	//jsons = msg.PackageMsg("Goods", string(jsons))
 
 	logon := Login{
-		Type:    1,                  // 登录类型 0、注册 1、登录 2、登出
+		Type:    0,                  // 登录类型 0、注册 1、登录 2、登出
 		Account: "",                 // 账号 userid/phone num/email
 		Phone:   1,                  // 手机号码
 		Email:   "446968454@qq.com", // 邮箱
@@ -80,9 +80,10 @@ func Handler(i int) {
 		}
 	}(conn)
 
-	for j := 0; j < 1; j++ {
+	for j := 0; j < 10; j++ {
 		wg.Add(1)
 		logon.Phone = i*10 + j
+		logon.Email = fmt.Sprintf("%d@qq.com", logon.Phone)
 		fmt.Printf("NUM: %3d\n", logon.Phone)
 		jsons, errs := json.Marshal(logon) //转换成JSON返回的是byte[]
 		if errs != nil {
@@ -95,10 +96,5 @@ func Handler(i int) {
 
 		time.Sleep(1000 * time.Millisecond)
 	}
-	// 发送消息
-	//conn1.WriteMsg(jsons)
-	//
-	//buff1, _ := conn.ReadMsg()
-	//fmt.Println("W S:" +strconv.Itoa(i) + "  " + string(buff1))
 	wgg.Done()
 }
